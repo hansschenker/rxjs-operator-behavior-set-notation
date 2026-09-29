@@ -1,5 +1,17 @@
 # Change Log
 
+## Operator-family implementation roadmap — 2026-09-29
+
+Added [the Operator-Family Implementation Plan](docs/FAMILY-IMPLEMENTATION-PLAN.md), revision 1.0: 34 bounded study packages across eight phases, an initial inventory of 146 qualified entries, dependency ordering, per-session specifications/comparisons/traces/evidence, completion gates, and a verified GitHub handoff policy.
+
+The core inventory is reconciled against the RxJS 7.8.2 root and operator export lists. It distinguishes creation and pipeable APIs with the same spelling, retains legacy entry points, normalizes ordinary re-exports, and assigns three transport-adapter extension targets. Named-entry coverage is not all-overload coverage or proof of semantic equivalence.
+
+The next session is F01 — Taking and dropping prefixes: takeWhile, skipWhile, take, and skip. Its brief includes boundary, empty/error/cancellation, callback-index, and synchronous execution checks. A minimal pinned TypeScript/RxJS trace-verification harness is planned as an explicit F01 verification extension; no compiler or replacement RxJS runtime is proposed.
+
+Added README navigation and the initial checkpoint. All 34 families remain Planned. Existing examples are preserved as starting material, not relabeled as complete family packages.
+
+Planning validation checked unique inventory ownership, ordered dependencies, roadmap status rows, delimiter balance, and relative targets against the inspected repository tree. It did not execute the full-repository documentation checker or an RxJS runtime suite. The shared notation, RxJS 7.8.2 baseline, and attribution are unchanged.
+
 ## ROB-SN conversation consolidation — 2026-09-29
 
 Adopted **ROB-SN — RxJS Operator Behavior Set Notation** and recorded the working ChatGPT project name **ROB-SN RxJS Operator Set Notation**. The repository name and RxJS 7.8.2 baseline are unchanged.
