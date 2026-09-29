@@ -1,6 +1,6 @@
-# Operator Analysis Template
+# ROB-SN Operator Analysis Template
 
-Copy this file for each new operator or configuration profile. Replace every placeholder and retain explicit exclusions. An unfilled field is not a specified behavior.
+Copy this file for one exact operator/configuration profile. Replace placeholders, retain explicit exclusions, and record evidence honestly. An unfilled field is not a specified behavior.
 
 ## 1. Identity and scope
 
@@ -8,123 +8,124 @@ Copy this file for each new operator or configuration profile. Replace every pla
 **RxJS baseline:** `7.8.2`  
 **Overload/configuration:** `<exact overload and parameters>`  
 **Model level:** `<behavioral macrosteps / execution microsteps>`  
-**Status:** `<proposal / source-reviewed / selectively tested>`
+**Status:** `<proposal / source-reviewed / selectively runtime-tested / proved under stated assumptions>`  
+**Execution scope:** `<one downstream subscription / shared coordinator / identified connection generation>`
 
-State what is excluded: deprecated overloads, invalid parameters, reentrant callbacks, scheduler variants, or other cases. Do not claim full-API coverage when only one configuration is modeled.
+Declare excluded overloads, invalid parameters, reentrant callbacks, scheduler variants, mutation, or failure paths. Do not claim full-API coverage for one profile. Distinguish an operator definition, a running subscription, and an independent producer.
 
 ## 2. What flows over time?
 
-Describe the data input, output, and any notifier, timer, inner, or lifecycle inputs. Explain what a new value does before introducing equations.
+Describe values, their input roles, and the required output policy before equations or code. Explain what happens on a new value and why this policy is required. Do not use the proposed classification as a substitute for analyzing the behavior.
 
-**Behavior policy:** `<for example: keep the latest inner, queue inputs, remember a running state>`
-
-**Why this operator:** `<which required behavior its policy implements>`
+**Behavior policy:** `<keep latest inner, queue while busy, retain a running state, etc.>`  
+**Why this operator:** `<required behavior>`
 
 ## 3. Parameters and function assumptions
 
-Define the fixed parameter set or record $\theta$.
+Define $\theta$: functions, count, seed, duration, scheduler, concurrency, reset choices, and any other fixed configuration. Record callback types/indexes, purity, termination, throws, external reads, and mutable-reference assumptions. Include the selected clock. Hidden environmental variation must be modeled or excluded.
 
-Record callback types, indexes, purity, termination, possible throws, and mutable-reference assumptions. Include the selected clock and scheduler when relevant. Externally changing state must be modeled or explicitly excluded.
+## 4. Slot spaces, identities, and initialization
 
-## 4. Spaces and identities
+Use the [Slot Catalogue](../docs/SLOT-CATALOGUE.md), selecting only relevant constructs.
 
-### State space
+| Slot | Exact definition | Required explanation |
+|---|---|---|
+| Event E | `<tagged notifications, controls, timers, internal events>` | Ports, payload domains, identities, admissible protocol |
+| Memory M | `<products, options, sequences, counters, etc.>` | Meaning, owner, growth bound, reset/release rules |
+| Lifecycle L | `<resource registry and teardown state>` | Owners, phases, membership, resource relationships |
+| Execution Status Q | `<open and terminal states at this scope>` | Meaning and distinction from stopped/closed implementation fields |
+| Next Actions A* | `<ordered programs over declared alphabet A>` | Interpretation of each constructor and empty output [] |
 
-$$
-S=\text{<explicit product, sum, sequence, or other declared space>}.
-$$
+A useful decomposition is $S=Q\times L\times M$, restricted by validity conditions; refine it with processing phases and continuation frames where required. Events and next actions are not automatically persistent state.
 
-Explain every component, who owns it, and what it remembers. A memoryless core uses a singleton, not the empty set.
+**Initialization convention:** `<separate initializer or explicit Start>`.
 
-### Event space
+Define $s_0\in S$ and any initial actions. State which bookkeeping and ownership relationships exist before each source can synchronously notify. Do not silently mix both initialization conventions. Fresh bookkeeping does not imply deep-cloning a captured seed.
 
-$$
-E=\text{<tagged source, inner, timer, lifecycle, and internal events>}.
-$$
-
-Declare source ports, inner identities, timer identities, and each payload space. State the admissible input protocol.
-
-### Action alphabet
-
-$$
-A=\text{<individual action constructors>}.
-$$
-
-The output of a reaction is $\alpha\in A^*$, an ordered finite sequence. Define empty output as `[]`.
-
-### Initial state and activation
-
-$$
-s_0=\text{<initial state>}\in S.
-$$
-
-Choose a separate initializer or an explicit `Start` transition. List initial actions and subscription order. State whether setup can synchronously notify.
-
-## 5. Transition signature and rules
+## 5. Transition rules
 
 $$
 \delta_\theta:S\times E\to S\times A^*,\qquad\delta_\theta(s,e)=(s',\alpha).
 $$
 
-Alternatively declare a restricted domain $D\subseteq S\times E$ explicitly.
+Alternatively declare an admissible domain $D\subseteq S\times E$. Use [catalogue IDs](../docs/TRANSITION-RULE-CATALOGUE.md) as cross-references, not substitutes for fully specified rules.
 
-| Incoming event and guard | Next state | Ordered actions | Explanation |
+| Rule IDs | Event and guard | Next state | Ordered actions | Explanation |
+|---|---|---|---|---|
+| `<...>` | Source next | `<...>` | `<...>` | `<...>` |
+| `<...>` | Source completion | `<...>` | `<...>` | `<...>` |
+| `<...>` | Source error | `<...>` | `<...>` | `<...>` |
+| `<...>` | Callback return/failure, if modeled | `<...>` | `<...>` | `<...>` |
+| `<...>` | Inner/notifier next/completion/error, if applicable | `<...>` | `<...>` | `<...>` |
+| `<...>` | Timer or boundary event, if applicable | `<...>` | `<...>` | `<...>` |
+| `<...>` | Downstream unsubscription | `<...>` | `<...>` | `<...>` |
+| `<...>` | Post-terminal events | `<...>` | `<...>` | `<...>` |
+
+Remove inapplicable categories with reasons; add missing variants. Guards must be exhaustive and nonoverlapping or have an explicit priority/combination policy. Separate deliberate no-op, invalid input, and unspecified case. Ordered actions can be interrupted; terminal post-states are not instructions to suppress an earlier pending Emit.
+
+## 6. Invariants and trace laws
+
+$$
+\mathrm{Inv}=\{s\in S\mid\text{declared validity conditions}\}.
+$$
+
+Explain initialization and invariant preservation. Distinguish stable-state conditions from transient implementation states.
+
+Specify applicable [trace laws](../docs/BEHAVIORAL-QUALITIES.md): terminal exclusivity, post-termination silence, finalization order, state succession, cancellation, ownership, and emission justification. Name each observation scope and excluded diagnostics. State validity alone does not establish a valid history.
+
+## 7. Termination and pending work
+
+| Trigger | Pending memory | Output notifications | Resource action / continuation |
 |---|---|---|---|
-| Source next | `<...>` | `<...>` | `<...>` |
-| Source completion | `<...>` | `<...>` | `<...>` |
-| Source error | `<...>` | `<...>` | `<...>` |
-| Callback return/failure, when modeled | `<...>` | `<...>` | `<...>` |
-| Inner next/completion/error, when applicable | `<...>` | `<...>` | `<...>` |
-| Timer/notifier event, when applicable | `<...>` | `<...>` | `<...>` |
-| Downstream unsubscription | `<...>` | `<...>` | `<...>` |
-| Later events after a terminal phase | `<...>` | `<...>` | `<...>` |
+| Source completion | `<flush/discard/retain>` | `<...>` | `<...>` |
+| Source error | `<...>` | `<forward/recover/retry/etc.>` | `<...>` |
+| Consumer unsubscription | `<...>` | `<none to the cancelled subscriber>` | `<...>` |
+| Operator-induced early completion | `<...>` | `<...>` | `<...>` |
+| Inner/notifier completion, if applicable | `<...>` | `<...>` | `<...>` |
 
-Remove inapplicable categories with a stated reason. Add any missing event variants. Make guards exhaustive and nonoverlapping, or state rule priority.
+Input completion is not universally output completion. Cleanup after complete/error is not a new cancelled outcome. Recovery and retry do not reopen a terminal downstream subscriber; they must prevent that terminal delivery while continuing.
 
-Separate source completion from output completion. Never infer a completion notification from cancellation.
+## 8. Execution contract
 
-## 6. Invariants
+Define $\mathcal I_\theta$ or name a precise existing contract. Record state-commit timing, action interpretation, synchronous nesting/resumption, callback failures, clocks/tie ordering, cancellation/teardown, ownership/sharing/reset, and snapshot/reference semantics.
 
-$$
-\mathrm{Inv}=\{s\in S\mid\text{<validity conditions>}\}.
-$$
+For $(t,i,e)$, define t and i; do not confuse event order with callback indexes or the nested execution stack. Distinguish logical outcome from stopped, closed, terminal-delivery, and disposal phases when needed. Cancellation disconnects modeled participation; physical work stops only as supported by source teardown.
 
-Explain why $s_0\in\mathrm{Inv}$ and why permitted transitions preserve validity. Distinguish stable-state invariants from transient execution conditions.
+## 9. Discriminating traces and evidence
 
-## 7. Execution contract
-
-Define $\mathcal I_\theta$ or identify a previously defined contract precisely.
-
-Record state-commit timing; action interpretation; reentrancy and suspended work; callback failures; clock and same-time order; cancellation and teardown; resource ownership; sharing/reset policy; and snapshot/reference semantics.
-
-For timed events use $(t,i,e)$ only after defining $t$ and $i$. Keep the event-processing index separate from callback indexes.
-
-Do not describe a macrostep as implementation-faithful until nested synchronous execution and intermediate writes have been addressed.
-
-## 8. Discriminating trace
-
-| Clock time | Processing order | Incoming event | State before | State after | Actions |
+| Clock | Processing order | Incoming event | State before | State after | Requested actions / delivered observations |
 |---|---|---|---|---|---|
-| `<t>` | `<i>` | `<e>` | `<s>` | `<s'>` | `<α>` |
+| `<t>` | `<i>` | `<e>` | `<s>` | `<s'>` | `<...>` |
 
-Choose a trace that distinguishes this operator from a nearby alternative, not only a happy path. Examples include cancellation during replacement, completion before readiness, a synchronous inner, or a timer/source tie.
+Choose a trace that distinguishes a nearby alternative. Include relevant partial completion, cancellation, same-time ties, synchronous inners, callback failures, reentrancy, and independent/shared subscription cases. For nested work, record microsteps rather than assuming atomic macrosteps.
 
-For reentrancy, record microsteps or nested entry/resume events rather than flattening each handler into an assumed atomic reaction.
+**Pinned implementation and inspected scope:** `<source URLs, optional blob SHAs>`  
+**Upstream tests:** `<paths/cases, with inspection/execution status>`  
+**Checks actually executed:** `<commands and actual outcomes, or none>`  
+**Observations compared:** `<values/order/time/indexes/lifetimes/teardown>`  
+**Known limitations:** `<unmodeled or untested cases>`
 
-## 9. Verification evidence
+Documentation checks are not runtime tests. A suggested test is not a passing test. Selected matching traces are not an exhaustive proof.
 
-**Pinned implementation:** `<source URL or immutable commit>`  
-**Relevant upstream tests:** `<test path and case>`  
-**Checks actually executed:** `<commands and outcomes, or none>`  
-**Observations compared:** `<values, order, timing, indexes, subscriptions, teardown>`  
-**Known limitations:** `<not-yet-specified or untested cases>`
+## 10. Derived behavioral qualities — Observe
 
-Distinguish a proposed test from a passing test, source inspection from execution, and selected checks from exhaustive proof.
+Record source/activation, value behavior, input roles/triggers, per-event/per-output cardinality, memory, time, concurrency, cancellation, termination, ownership, and sharing. Separate model predictions from execution observations; requested emissions can differ from delivered notifications under interruption.
 
-## 10. Final behavioral statement
+## 11. Classification — the conclusion
 
-> `<One precise paragraph: what is remembered, what arrives, what state changes, what actions occur, and when execution ends.>`
+**Families:** `<justified memberships>`  
+**Behavior-control policies:** `<explicit choices>`  
+**Reason:** `<qualities and transitions supporting each label>`  
+**Scope:** `<configuration and observation limits>`
+
+Use [Behavior Families](../docs/BEHAVIOR-FAMILIES.md) as a starting vocabulary, not a complete partition of operators. Several classifications may apply.
+
+## 12. Final behavioral statement
+
+> `<What is remembered, what arrives, what changes, which ordered actions occur, and when this scoped execution ends.>`
 
 $$
 \mathcal O_\theta=(S,E,A,s_0,\delta_\theta,\mathcal I_\theta,\mathrm{Inv}).
 $$
+
+Model → Observe → Classify. The classification follows the analysis.
