@@ -3,7 +3,7 @@
 **GPT-6 Astra is the main contributor of the project.**
 
 Developed in collaboration with Hans Schenker. **Reference baseline: RxJS 7.8.2.**  
-**Status:** Proposed specification; expanded documentation edition, 29 September 2026.  
+**Status:** Proposed specification; expanded documentation and family-roadmap edition, 29 September 2026.  
 **Working ChatGPT project:** ROB-SN RxJS Operator Set Notation.
 
 > Represent operator behavior, observe its qualities, and make classification the conclusion of the analysis.
@@ -32,6 +32,16 @@ CLASSIFY    Identify justified behavior families and policies.
 
 The [project guide](docs/PROJECT-GUIDE.md) explains this workflow. **Language for teaching; algebra for precise semantics.**
 
+## Family-by-family implementation
+
+The [Operator-Family Implementation Plan](docs/FAMILY-IMPLEMENTATION-PLAN.md) organizes the next work into **34 bounded study packages across eight phases**, with a qualified API inventory, dependencies, per-session deliverables, completion gates, and a durable GitHub handoff.
+
+**Next session: F01 — Taking and dropping prefixes**, using `takeWhile` as the reference and comparing `skipWhile`, `take`, and `skip`.
+
+Each session implements scoped ROB-SN specifications, compares related operators, records source and trace evidence, and saves a verified checkpoint to `main`. Study families organize the investigation; classification remains its conclusion. The plan proposes a small RxJS 7.8.2 trace-verification harness in F01, not an operator replacement or compiler.
+
+**Planning checkpoint:** 0 of 34 family packages complete. The roadmap is saved; family implementation and its new runtime checks have not started. Use the current roadmap checkpoint rather than this initial announcement when resuming later sessions.
+
 ## The five-slot view
 
 | Slot | Question |
@@ -51,6 +61,7 @@ Persistent state can be decomposed as $s=(q,\ell,m)$: status, lifecycle bookkeep
 | Document | Purpose |
 |---|---|
 | [Project guide](docs/PROJECT-GUIDE.md) | Purpose, teaching vocabulary, and Model → Observe → Classify |
+| [Operator-family implementation plan](docs/FAMILY-IMPLEMENTATION-PLAN.md) | Session order, API assignments, progress, completion gates, and the F01 brief |
 | [Slot catalogue](docs/SLOT-CATALOGUE.md) | Five slots, value spaces, identities, memory shapes, and ownership |
 | [Transition-rule catalogue](docs/TRANSITION-RULE-CATALOGUE.md) | 40 proposed templates across seven families |
 | [Behavioral qualities and trace laws](docs/BEHAVIORAL-QUALITIES.md) | Triggers, cardinality, timing, concurrency, cancellation, termination, sharing, and valid histories |
